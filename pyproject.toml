@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "roslauncher"
+version = "0.1.0-alpha"
+description = "Discord Launcher for Railway Operation Simulator"
+authors = [" Kristian Zarębski <krizar312@gmail.com>"]
+license = "GPLv3"
+
+[tool.poetry.dependencies]
+python = "^3.9,<3.11"
+toml = "^0.10.2"
+discordsdk = "^0.2.5"
+pycountry = "^20.7.3"
+rostools = {path = "external/rostools/python"}
+
+[tool.poetry.dev-dependencies]
+pyinstaller = "^4.8"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
