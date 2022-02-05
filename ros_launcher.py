@@ -212,4 +212,4 @@ class DiscordBroadcaster:
 
 if __name__ in "__main__":
     logging.getLogger("ROSTools").setLevel(logging.DEBUG)
-    DiscordBroadcaster(".").run()
+    DiscordBroadcaster("..").run()

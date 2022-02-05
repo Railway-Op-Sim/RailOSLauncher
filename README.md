@@ -1,5 +1,5 @@
 <p align="center">
-<img 
+<img
     style="display: block; 
            margin-left: auto;
            margin-right: auto;
@@ -15,7 +15,8 @@ The activity displayed includes operation mode (e.g. building or running a simul
 based in.
 
 ## Installation
-Place the executable alongside the main program executable for your Railway Operation Simulator installation, `railway.exe`.
+Place the folder `ROSLauncher` into the directory `<ros-installation>/Railway` where `ros-installation` is the location of your Railway Operation Simulator installation. Unfortunately we cannot directly provide the required SDKs
+from Discord due to Licensing so you will need to download these yourself here [here](https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip), placing the contained `lib` directory into `<ros-installation>/Railway/ROSLauncher`.
 
 ## Building
 The application is built using Pyinstaller under Poetry, to build it you will first need to download the Discord SDK from [here](https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip).
