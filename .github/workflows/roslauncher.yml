@@ -6,6 +6,8 @@ jobs:
     name: ROS Launcher Testing
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - uses: actions/setup-python@v2
         with:
           python-version: '3.9'
@@ -30,7 +32,7 @@ jobs:
 
       - name: Get ROS
         run: |
-          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/v2.11.1/Release.v2.11.1.zip 
+          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/v2.11.1/Release.v2.11.1.zip
           unzip Release.v2.11.1.zip
           mkdir Release.v2.11.1/Railway/DiscordLauncher
           mv lib Release.v2.11.1/Railway/DiscordLauncher
