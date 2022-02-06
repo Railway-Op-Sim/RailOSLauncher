@@ -34,7 +34,7 @@ jobs:
         run: |
           wget https://github.com/AlbertBall/railway-dot-exe/releases/download/v2.11.1/Release.v2.11.1.zip
           unzip Release.v2.11.1.zip
-          mkdir Release.v2.11.1/Railway/DiscordLauncher
+          mkdir -p Release.v2.11.1/Railway/DiscordLauncher
           mv lib Release.v2.11.1/Railway/DiscordLauncher
           mv dist/ros_launcher.exe Release.v2.11.1/Railway/DiscordLauncher
         shell: bash
