@@ -1,0 +1,33 @@
+name: ROSLauncher
+on: [push]
+jobs:
+  testing:
+    runs-on: windows-latest
+    name: ROS Launcher Testing
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          architecture: 'x64'
+      - uses: Gr1N/setup-poetry@v7
+      - name: Fetch Discord SDK
+        run: |
+          wget https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip
+          unzip discord_game_sdk.zip
+          mkdir lib
+          cp discord_game_sdk/x86_64/discord_game_sdk.dll lib/
+          rm -rf discord_game_sdk*
+      - name: Build application
+        run: bash build.sh
+
+      - name: Get ROS
+        run: |
+          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/v2.11.1/Release.v2.11.1.zip 
+          unzip Release.v2.11.1.zip
+          mkdir Release.v2.11.1/Railway/DiscordLauncher
+          mv lib Release.v2.11.1/Railway/DiscordLauncher
+          mv dist/ros_launcher.exe Release.v2.11.1/Railway/DiscordLauncher
+
+      - name: Test application
+        run: ./Release.v2.11.1/Railway/DiscordLauncher/ros_launcher.exe
