@@ -15,8 +15,18 @@ The activity displayed includes operation mode (e.g. building or running a simul
 based in.
 
 ## Installation
+Unfortunately I have not been able to get this to work without a Python installation on the user's system. You will need to download and install Python, we recommend using Python3.9 as this has been proven to definitely work, download [here](https://www.python.org/downloads/release/python-3910/).
+
 Place the folder `ROSLauncher` into the directory `<ros-installation>/Railway` where `ros-installation` is the location of your Railway Operation Simulator installation. Unfortunately we cannot directly provide the required SDKs
-from Discord due to Licensing so you will need to download these yourself here [here](https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip), placing the contained `lib` directory into `<ros-installation>/Railway/ROSLauncher`.
+from Discord due to Licensing so you will need to download these yourself here [here](https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip). Place the DLL `discord_game_sdk.dll` into a folder `lib` within the launcher directory. The end directory structure in your ROS installation should look like:
+
+```sh
+|-- railway.exe
+|-- ROSLauncher
+   |-- lib
+   |   |-- discord_game_sdk.dll
+   |-- ros_launcher.exe
+```
 
 ## Building
 The application is built using Pyinstaller under Poetry, to build it you will first need to download the Discord SDK from [here](https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip).
