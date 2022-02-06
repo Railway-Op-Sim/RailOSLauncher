@@ -19,12 +19,14 @@ jobs:
           mkdir lib
           cp discord_game_sdk/lib/x86_64/discord_game_sdk.dll lib/
           rm -rf discord_game_sdk*
+        shell: bash
 
       - name: Build application
         run: |
           poetry install
           poetry run SITE_PACKAGES=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
           pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/ROSLauncher.ico' --clean ros_launcher.py
+        shell: bash
 
       - name: Get ROS
         run: |
@@ -33,6 +35,8 @@ jobs:
           mkdir Release.v2.11.1/Railway/DiscordLauncher
           mv lib Release.v2.11.1/Railway/DiscordLauncher
           mv dist/ros_launcher.exe Release.v2.11.1/Railway/DiscordLauncher
+        shell: bash
 
       - name: Test application
         run: ./Release.v2.11.1/Railway/DiscordLauncher/ros_launcher.exe
+        shell: bash
