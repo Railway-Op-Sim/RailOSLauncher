@@ -22,10 +22,10 @@ from Discord due to Licensing so you will need to download these yourself here [
 
 ```sh
 |-- railway.exe
-|-- ROSLauncher
-   |-- lib
-   |   |-- discord_game_sdk.dll
-   |-- ros_launcher.exe
+`-- ROSLauncher
+    |-- lib
+    |   `-- discord_game_sdk.dll
+    `-- ros_launcher.exe
 ```
 
 ## Building
