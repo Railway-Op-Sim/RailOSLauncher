@@ -18,8 +18,12 @@ jobs:
           mkdir lib
           cp discord_game_sdk/x86_64/discord_game_sdk.dll lib/
           rm -rf discord_game_sdk*
+
       - name: Build application
-        run: bash build.sh
+        run: |
+          poetry install
+          poetry run SITE_PACKAGES=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
+          pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/ROSLauncher.ico' --clean ros_launcher.py
 
       - name: Get ROS
         run: |
