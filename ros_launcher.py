@@ -3,7 +3,6 @@ import configparser
 import datetime
 import glob
 import logging
-import pathlib
 import os.path
 
 import discordsdk
@@ -161,6 +160,11 @@ class DiscordBroadcaster:
                 _current_rly = parser.get("session", "railway")
                 _meta = self._check_for_metadata(_current_rly)
                 _current_rly = _current_rly.replace("_", " ").title()
+                if _meta:
+                    if "display_name" in _meta:
+                        _current_rly = _meta["display_name"]
+                    elif "name" in _meta:
+                        _current_rly = _meta["name"]
                 if _meta and "country_code" in _meta:
                     self._logger.info(
                         f"Recognised country code '{_meta['country_code']}'"
