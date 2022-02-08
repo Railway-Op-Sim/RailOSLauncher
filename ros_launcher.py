@@ -20,7 +20,7 @@ def alpha2_country_codes():
 
 
 class DiscordBroadcaster:
-    _version = "v0.1.0-alpha"
+    _version = "v0.1.2-alpha"
     _app_id = "893179281189003274"
     _logger = logging.getLogger("ROSTools.Discord")
     _activity = discordsdk.Activity()
@@ -132,6 +132,8 @@ class DiscordBroadcaster:
             _oper_mode = Level2OperMode(parser.getint("session", "operation_mode"))
         except configparser.NoOptionError:
             return
+        except configparser.NoSectionError:
+            return
 
         if self._mode["main"] == _top_mode and self._mode["oper"] == _oper_mode:
             return
@@ -180,6 +182,8 @@ class DiscordBroadcaster:
                 _new_status = f"{_activity} {_current_rly}"
             except configparser.NoOptionError:
                 self._logger.error("Failed to find key 'railway' in INI file")
+            except configparser.NoSectionError:
+                self._logger.error("Failed to find section 'session' in INI file")
 
         if self._activity.details != _new_status and _new_status:
             self._activity.details = _new_status
@@ -191,7 +195,12 @@ class DiscordBroadcaster:
         while self._running:
             await asyncio.sleep(2)
             _parser = self._load_session_ini()
-            self._running = _parser.getboolean("session", "running")
+            try:
+                self._running = _parser.getboolean("session", "running")
+            except configparser.NoOptionError:
+                self._logger.error("Failed to find key 'running' in INI file")
+            except configparser.NoSectionError:
+                self._logger.error("Failed to find section 'session' in INI file")
             self._update_status(_parser)
 
     async def _run_ros(self) -> None:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "roslauncher"
-version = "0.1.0-alpha"
+version = "0.1.2-alpha"
 description = "Discord Launcher for Railway Operation Simulator"
 authors = [" Kristian Zarębski <krizar312@gmail.com>"]
 license = "GPLv3"
