@@ -242,7 +242,9 @@ class DiscordBroadcaster:
 if __name__ in "__main__":
     import argparse
     _parser = argparse.ArgumentParser()
-    _parser.add_argument("railos_location", help="Location of the RailOS railway.exe file", default="..")
+    _parser.add_argument("--railos-location", help="Location of the RailOS railway.exe file", default="..")
     _railos_loc = _parser.parse_args().railos_location
     logging.getLogger("RailOSTools").setLevel(logging.DEBUG)
+    if not os.path.exists(_railos_loc):
+        raise AssertionError(f"Launcher failed, could not find Railway Operation Simulator 'railway.exe' at '{_railos_loc}'")
     DiscordBroadcaster(_railos_loc).run()
