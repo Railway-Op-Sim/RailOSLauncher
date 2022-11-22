@@ -44,8 +44,8 @@ jobs:
           mv dist/railos_launcher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
         shell: bash
 
-      - name: Test application
+      - name: Test application (10 seconds)
         run: |
           LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1)
-          ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/railos_launcher.exe
+          timeout 10 ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/railos_launcher.exe
         shell: bash
