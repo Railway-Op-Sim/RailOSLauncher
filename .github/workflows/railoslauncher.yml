@@ -5,7 +5,7 @@ jobs:
     runs-on: windows-latest
     name: RailOS Launcher Testing
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - uses: actions/setup-python@v2
@@ -46,6 +46,6 @@ jobs:
 
       - name: Test application (10 seconds)
         run: |
-          LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1)
-          timeout 10 ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/railos_launcher.exe
+          timeout 10 LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1) \
+          ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/railos_launcher.exe
         shell: bash
