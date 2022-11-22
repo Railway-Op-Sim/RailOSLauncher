@@ -21,7 +21,7 @@ import discordsdk
 import pycountry
 import toml
 
-from railostools.common import Level1Mode, Level2OperMode
+from railostools.common.enumeration import Level1Mode, Level2OperMode
 
 
 def alpha2_country_codes():
@@ -240,5 +240,9 @@ class DiscordBroadcaster:
 
 
 if __name__ in "__main__":
+    import argparse
+    _parser = argparse.ArgumentParser()
+    _parser.add_argument("railos_location", help="Location of the RailOS railway.exe file", default="..")
+    _railos_loc = _parser.parse_args().railos_location
     logging.getLogger("RailOSTools").setLevel(logging.DEBUG)
-    DiscordBroadcaster("..").run()
+    DiscordBroadcaster(_railos_loc).run()
