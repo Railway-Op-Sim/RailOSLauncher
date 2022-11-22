@@ -21,7 +21,7 @@ import discordsdk
 import pycountry
 import toml
 
-from rostools.common import Level1Mode, Level2OperMode
+from railostools.common import Level1Mode, Level2OperMode
 
 
 def alpha2_country_codes():
@@ -34,7 +34,7 @@ def alpha2_country_codes():
 class DiscordBroadcaster:
     _version = "v0.1.3"
     _app_id = "893179281189003274"
-    _logger = logging.getLogger("ROSTools.Discord")
+    _logger = logging.getLogger("RailOSTools.Discord")
     _activity = discordsdk.Activity()
     _logo_key = "railway_operation_simulator_logo"
     _flags = alpha2_country_codes()
@@ -54,22 +54,22 @@ class DiscordBroadcaster:
                                    ╱
                             ______╱__°╗_____
 
-    This executable updates your user Discord status during an ROS session!
+  This executable updates your user Discord status during an RailOS session!
 
 =============================================================================
 """
 
-    def __init__(self, ros_location: str) -> None:
-        if not os.path.exists(ros_location):
+    def __init__(self, railos_location: str) -> None:
+        if not os.path.exists(railos_location):
             raise FileNotFoundError(
-                f"Cannot location Railway Operation Simulator, path '{ros_location}' "
+                f"Cannot location Railway Operation Simulator, path '{railos_location}' "
                 "does not exist"
             )
         self._logger.info(self._welcome_message.format(version=self._version))
         self._start = datetime.datetime.now()
         self._running = True
         self._mode = {"main": "", "oper": ""}
-        self._ros_loc = ros_location
+        self._railos_loc = railos_location
         self._discord = discordsdk.Discord(
             int(self._app_id), discordsdk.CreateFlags.default
         )
@@ -99,12 +99,12 @@ class DiscordBroadcaster:
             self._discord.run_callbacks()
 
     def _check_for_metadata(self, route: str):
-        if not os.path.exists(os.path.join(self._ros_loc, "Metadata")):
+        if not os.path.exists(os.path.join(self._railos_loc, "Metadata")):
             return {}
 
         _meta_list = [
             os.path.splitext(os.path.basename(i))[0]
-            for i in glob.glob(os.path.join(self._ros_loc, "Metadata", "*.toml"))
+            for i in glob.glob(os.path.join(self._railos_loc, "Metadata", "*.toml"))
         ]
 
         if os.path.splitext(os.path.basename(route))[0] not in _meta_list:
@@ -112,7 +112,7 @@ class DiscordBroadcaster:
 
         _data = toml.load(
             os.path.join(
-                self._ros_loc,
+                self._railos_loc,
                 "Metadata",
                 f"{os.path.splitext(os.path.basename(route))[0]}.toml",
             )
@@ -126,7 +126,7 @@ class DiscordBroadcaster:
         return _data
 
     def _load_session_ini(self) -> configparser.ConfigParser:
-        _session_data = os.path.join(self._ros_loc, "session.ini")
+        _session_data = os.path.join(self._railos_loc, "session.ini")
 
         if not os.path.exists(_session_data):
             raise FileNotFoundError(
@@ -219,17 +219,17 @@ class DiscordBroadcaster:
                 self._logger.error(f"Retrieval of 'running' state failed with '{e}'")
             self._update_status(_parser)
 
-    async def _run_ros(self) -> None:
-        if not os.path.exists(os.path.join(self._ros_loc, "railway.exe")):
+    async def _run_railos(self) -> None:
+        if not os.path.exists(os.path.join(self._railos_loc, "railway.exe")):
             raise FileNotFoundError(
-                f"No binary '{os.path.join(self._ros_loc, 'railway.exe')}' was found"
+                f"No binary '{os.path.join(self._railos_loc, 'railway.exe')}' was found"
             )
         await asyncio.create_subprocess_shell(
-            os.path.join(self._ros_loc, "railway.exe")
+            os.path.join(self._railos_loc, "railway.exe")
         )
 
     async def _main(self):
-        await asyncio.gather(self._run_sdk(), self._check_for_temp(), self._run_ros())
+        await asyncio.gather(self._run_sdk(), self._check_for_temp(), self._run_railos())
 
     def run(self):
         self._start = datetime.datetime.now()

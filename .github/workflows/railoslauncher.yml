@@ -1,9 +1,9 @@
-name: ROSLauncher
+name: RailOS Launcher
 on: [push]
 jobs:
   testing:
     runs-on: windows-latest
-    name: ROS Launcher Testing
+    name: RailOS Launcher Testing
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,7 +31,7 @@ jobs:
         run: |
           LC_ALL="UTF-8" LC_CTYPE="UTF-8" poetry install
           SITE_PACKAGES=$(poetry run python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
-          poetry run pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/ROSLauncher.ico' --clean railos_launcher.py
+          poetry run pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/RailOSLauncher.ico' --clean railos_launcher.py
         shell: bash
 
       - name: Get RailOS
@@ -41,7 +41,7 @@ jobs:
           unzip Release-$LATEST_RAILOS.zip
           mkdir -p Release-$LATEST_RAILOS/Railway/DiscordLauncher
           mv lib Release-$LATEST_RAILOS/Railway/DiscordLauncher
-          mv dist/ros_launcher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
+          mv dist/railos_launcher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
         shell: bash
 
       - name: Test application
