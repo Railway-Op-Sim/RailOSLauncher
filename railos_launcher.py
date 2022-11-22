@@ -1,3 +1,15 @@
+"""
+Railway Operation Simulator Discord Launcher
+============================================
+
+This launcher provides live information on the user's current Railway Operation Simulator
+session, giving status updates such as which route is being operated and how long for.
+As well as the mode (e.g. editting a timetable etc).
+"""
+__author__ = "Kristian Zarebski <krizar312@gmail.com>"
+__date__ = "2022-02-08"
+__license__ = "GPLv3"
+
 import asyncio
 import configparser
 import datetime
@@ -20,7 +32,7 @@ def alpha2_country_codes():
 
 
 class DiscordBroadcaster:
-    _version = "v0.1.2-alpha"
+    _version = "v0.1.3"
     _app_id = "893179281189003274"
     _logger = logging.getLogger("ROSTools.Discord")
     _activity = discordsdk.Activity()
@@ -184,6 +196,8 @@ class DiscordBroadcaster:
                 self._logger.error("Failed to find key 'railway' in INI file")
             except configparser.NoSectionError:
                 self._logger.error("Failed to find section 'session' in INI file")
+            except AttributeError as e:
+                self._logger.error(f"Retrieval of session information failed with '{e}'")
 
         if self._activity.details != _new_status and _new_status:
             self._activity.details = _new_status
@@ -201,6 +215,8 @@ class DiscordBroadcaster:
                 self._logger.error("Failed to find key 'running' in INI file")
             except configparser.NoSectionError:
                 self._logger.error("Failed to find section 'session' in INI file")
+            except AttributeError as e:
+                self._logger.error(f"Retrieval of 'running' state failed with '{e}'")
             self._update_status(_parser)
 
     async def _run_ros(self) -> None:
@@ -224,5 +240,5 @@ class DiscordBroadcaster:
 
 
 if __name__ in "__main__":
-    logging.getLogger("ROSTools").setLevel(logging.DEBUG)
+    logging.getLogger("RailOSTools").setLevel(logging.DEBUG)
     DiscordBroadcaster("..").run()

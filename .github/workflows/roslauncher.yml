@@ -10,7 +10,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.10'
           architecture: 'x64'
       - uses: Gr1N/setup-poetry@v7
       - name: Fetch Discord SDK
@@ -23,22 +23,29 @@ jobs:
           rm -rf discord_game_sdk*
         shell: bash
 
+      - name: Get Previous tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
       - name: Build application
         run: |
           LC_ALL="UTF-8" LC_CTYPE="UTF-8" poetry install
           SITE_PACKAGES=$(poetry run python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
-          poetry run pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/ROSLauncher.ico' --clean ros_launcher.py
+          poetry run pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/ROSLauncher.ico' --clean railos_launcher.py
         shell: bash
 
-      - name: Get ROS
+      - name: Get RailOS
         run: |
-          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/v2.11.1/Release.v2.11.1.zip
-          unzip Release.v2.11.1.zip
-          mkdir -p Release.v2.11.1/Railway/DiscordLauncher
-          mv lib Release.v2.11.1/Railway/DiscordLauncher
-          mv dist/ros_launcher.exe Release.v2.11.1/Railway/DiscordLauncher
+          LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1)
+          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/$LATEST_RAILOS/Release-$LATEST_RAILOS.zip
+          unzip Release-$LATEST_RAILOS.zip
+          mkdir -p Release-$LATEST_RAILOS/Railway/DiscordLauncher
+          mv lib Release-$LATEST_RAILOS/Railway/DiscordLauncher
+          mv dist/ros_launcher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
         shell: bash
 
       - name: Test application
-        run: ./Release.v2.11.1/Railway/DiscordLauncher/ros_launcher.exe
+        run: |
+          LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1)
+          ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/railos_launcher.exe
         shell: bash
