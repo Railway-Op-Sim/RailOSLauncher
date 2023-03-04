@@ -11,11 +11,14 @@ __date__ = "2022-02-08"
 __license__ = "GPLv3"
 
 import asyncio
+import typing
 import configparser
 import datetime
 import glob
 import logging
 import os.path
+
+logging.basicConfig()
 
 import discordsdk
 import pycountry
@@ -24,7 +27,7 @@ import toml
 from railostools.common.enumeration import Level1Mode, Level2OperMode
 
 
-def alpha2_country_codes():
+def alpha2_country_codes() -> typing.Dict[str, str]:
     return {
         country.alpha_2: country.name.lower().replace(" ", "-")
         for country in pycountry.countries
@@ -32,13 +35,13 @@ def alpha2_country_codes():
 
 
 class DiscordBroadcaster:
-    _version = "v0.1.3"
-    _app_id = "893179281189003274"
-    _logger = logging.getLogger("RailOSTools.Discord")
+    _version: str = "v0.1.4"
+    _app_id: str = "893179281189003274"
+    _logger: logging.Logger = logging.getLogger("RailOSTools.Discord")
     _activity = discordsdk.Activity()
     _logo_key = "railway_operation_simulator_logo"
-    _flags = alpha2_country_codes()
-    _oper_mode_statuses = {
+    _flags: typing.Dict[str, str] = alpha2_country_codes()
+    _oper_mode_statuses: typing.Dict[Level2OperMode, str] = {
         Level2OperMode.NoOperMode: "",
         Level2OperMode.Paused: "Paused",
         Level2OperMode.Operating: "Operating",
@@ -54,17 +57,18 @@ class DiscordBroadcaster:
                                    ╱
                             ______╱__°╗_____
 
-  This executable updates your user Discord status during an RailOS session!
+  This executable updates your user Discord status during a RailOS session!
 
 =============================================================================
 """
 
-    def __init__(self, railos_location: str) -> None:
+    def __init__(self, railos_location: str, debug: bool=False) -> None:
         if not os.path.exists(railos_location):
             raise FileNotFoundError(
                 f"Cannot location Railway Operation Simulator, path '{railos_location}' "
                 "does not exist"
             )
+        self._logger.setLevel(logging.DEBUG if debug else logging.INFO)
         self._logger.info(self._welcome_message.format(version=self._version))
         self._start = datetime.datetime.now()
         self._running = True
@@ -91,39 +95,12 @@ class DiscordBroadcaster:
         if result == discordsdk.Result.ok:
             self._logger.info("Activity set successfully!")
         else:
-            raise Exception(result)
+            raise AssertionError(result)
 
     async def _run_sdk(self) -> None:
         while self._running:
             await asyncio.sleep(1 / 10.0)
             self._discord.run_callbacks()
-
-    def _check_for_metadata(self, route: str):
-        if not os.path.exists(os.path.join(self._railos_loc, "Metadata")):
-            return {}
-
-        _meta_list = [
-            os.path.splitext(os.path.basename(i))[0]
-            for i in glob.glob(os.path.join(self._railos_loc, "Metadata", "*.toml"))
-        ]
-
-        if os.path.splitext(os.path.basename(route))[0] not in _meta_list:
-            return {}
-
-        _data = toml.load(
-            os.path.join(
-                self._railos_loc,
-                "Metadata",
-                f"{os.path.splitext(os.path.basename(route))[0]}.toml",
-            )
-        )
-
-        if "rly_file" not in _data or os.path.splitext(_data["rly_file"])[
-            0
-        ] != os.path.basename(route):
-            return {}
-
-        return _data
 
     def _load_session_ini(self) -> configparser.ConfigParser:
         _session_data = os.path.join(self._railos_loc, "session.ini")
@@ -138,13 +115,28 @@ class DiscordBroadcaster:
 
         return _parser
 
+    def _load_metadata(self, parser: configparser.ConfigParser) -> None:
+        try:
+            _metadata_file: str = parser.get("session", "metadata_file")
+            return toml.load(_metadata_file)
+        except configparser.NoOptionError:
+            self._logger.warning("Failed to retrieve session information from INI file,"
+                                 "this version of RailOSLauncher requires a RailOS version with API v1.2")
+            return {}
+        except configparser.NoSectionError:
+            self._logger.warning("Failed to retrieve metadata file information from INI file,"
+                                 "this version of RailOSLauncher requires a RailOS version with API v1.2")
+            return {}
+
     def _update_status(self, parser: configparser.ConfigParser):
         try:
             _top_mode = Level1Mode(parser.getint("session", "main_mode"))
             _oper_mode = Level2OperMode(parser.getint("session", "operation_mode"))
         except configparser.NoOptionError:
+            self._logger.warning("Failed to retrieve session information from INI file")
             return
         except configparser.NoSectionError:
+            self._logger.warning("Failed to retrieve current mode information from INI file")
             return
 
         if self._mode["main"] == _top_mode and self._mode["oper"] == _oper_mode:
@@ -172,7 +164,7 @@ class DiscordBroadcaster:
         if _activity:
             try:
                 _current_rly = parser.get("session", "railway")
-                _meta = self._check_for_metadata(_current_rly)
+                _meta = self._load_metadata(parser)
                 _current_rly = _current_rly.replace("_", " ").title()
                 if _meta:
                     if "display_name" in _meta:
@@ -188,7 +180,7 @@ class DiscordBroadcaster:
                             _meta["country_code"]
                         ]
                     except KeyError:
-                        self._logger.debug(
+                        self._logger.warning(
                             "No country found for simulation, no sub-icon will be used"
                         )
                 _new_status = f"{_activity} {_current_rly}"
@@ -243,8 +235,9 @@ if __name__ in "__main__":
     import argparse
     _parser = argparse.ArgumentParser()
     _parser.add_argument("--railos-location", help="Location of the RailOS railway.exe file", default="..")
-    _railos_loc = _parser.parse_args().railos_location
-    logging.getLogger("RailOSTools").setLevel(logging.DEBUG)
+    _parser.add_argument("--debug", action="store_true", default=False, help="Run in debug mode")
+    _args = _parser.parse_args()
+    _railos_loc = _args.railos_location
     if not os.path.exists(_railos_loc):
         raise AssertionError(f"Launcher failed, could not find Railway Operation Simulator 'railway.exe' at '{_railos_loc}'")
-    DiscordBroadcaster(_railos_loc).run()
+    DiscordBroadcaster(_railos_loc, _args.debug).run()
