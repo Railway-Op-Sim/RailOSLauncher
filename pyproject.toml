@@ -11,9 +11,13 @@ toml = "^0.10.2"
 discordsdk = "^0.2.5"
 railostools = {path = "external/railostools/python"}
 pycountry = "^22.3.5"
+configparser = "^5.3.0"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.8"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
