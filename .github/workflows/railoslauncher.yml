@@ -31,21 +31,21 @@ jobs:
         run: |
           LC_ALL="UTF-8" LC_CTYPE="UTF-8" poetry install
           SITE_PACKAGES=$(poetry run python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
-          poetry run pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/RailOSLauncher.ico' --clean railos_launcher.py
+          poetry run pyinstaller RailOSLauncher.spec
         shell: bash
 
       - name: Get RailOS
         run: |
           LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1)
-          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/$LATEST_RAILOS/Release-$LATEST_RAILOS.zip
+          wget https://github.com/AlbertBall/railway-dot-exe/releases/download/$LATEST_RAILOS/Release.$LATEST_RAILOS.zip
           unzip Release-$LATEST_RAILOS.zip
           mkdir -p Release-$LATEST_RAILOS/Railway/DiscordLauncher
           mv lib Release-$LATEST_RAILOS/Railway/DiscordLauncher
-          mv dist/railos_launcher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
+          mv dist/RailOSLauncher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
         shell: bash
 
       - name: Test application (10 seconds)
         run: |
           timeout 10 LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1) \
-          ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/railos_launcher.exe
+          ./Release-$LATEST_RAILOS/Railway/DiscordLauncher/RailOSLauncher.exe
         shell: bash
