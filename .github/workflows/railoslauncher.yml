@@ -38,7 +38,7 @@ jobs:
         run: |
           LATEST_RAILOS=$(curl https://github.com/AlbertBall/railway-dot-exe/releases/ | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+" | sort -uV | tail -n 1)
           wget https://github.com/AlbertBall/railway-dot-exe/releases/download/$LATEST_RAILOS/Release.$LATEST_RAILOS.zip
-          unzip Release-$LATEST_RAILOS.zip
+          unzip Release.$LATEST_RAILOS.zip -d Release-$LATEST_RAILOS
           mkdir -p Release-$LATEST_RAILOS/Railway/DiscordLauncher
           mv lib Release-$LATEST_RAILOS/Railway/DiscordLauncher
           mv dist/RailOSLauncher.exe Release-$LATEST_RAILOS/Railway/DiscordLauncher
