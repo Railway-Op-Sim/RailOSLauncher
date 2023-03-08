@@ -37,7 +37,7 @@ def alpha2_country_codes() -> typing.Dict[str, str]:
 
 
 class DiscordBroadcaster:
-    _version: str = "v0.1.4"
+    _version: str = "v0.1.4-rc1"
     _app_id: str = "893179281189003274"
     _logger: logging.Logger = logging.getLogger("RailOSTools.Discord")
     _activity = discordsdk.Activity()
@@ -139,7 +139,7 @@ class DiscordBroadcaster:
         _parser = configparser.ConfigParser()
 
         if not _parser.read(self._session_ini_file):
-            raise configparser.ParsingError
+            raise configparser.ParsingError(filename=self._session_ini_file)
 
         return _parser
 
