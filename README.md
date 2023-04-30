@@ -26,5 +26,12 @@ from Discord due to Licensing so you will need to download these yourself here [
     `-- railos_launcher.exe
 ```
 
+### Placing External to RailOS
+If you want to install the launcher external to the RailOS create a shortcut in Windows and update the `Target` argument to point to the location of the program executable:
+
+```sh
+RailOSLauncher.exe --railos-location <railos-path>
+```
+
 ## Building
 The application is built using Pyinstaller under Poetry, to build it you will first need to download the Discord SDK from [here](https://dl-game-sdk.discordapp.net/2.5.6/discord_game_sdk.zip).

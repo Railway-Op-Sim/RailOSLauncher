@@ -125,6 +125,10 @@ class DiscordBroadcaster:
     def _load_metadata(self, parser: configparser.ConfigParser) -> None:
         try:
             _metadata_file: str = parser.get("session", "metadata_file")
+
+            if not _metadata_file or not os.path.exists(_metadata_file):
+                return {}
+
             return toml.load(_metadata_file)
         except configparser.NoOptionError:
             self._logger.warning(
