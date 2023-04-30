@@ -37,7 +37,7 @@ def alpha2_country_codes() -> typing.Dict[str, str]:
 
 
 class DiscordBroadcaster:
-    _version: str = "v0.1.4-rc1"
+    _version: str = "v0.1.5-alpha"
     _app_id: str = "893179281189003274"
     _logger: logging.Logger = logging.getLogger("RailOSTools.Discord")
     _activity = discordsdk.Activity()
