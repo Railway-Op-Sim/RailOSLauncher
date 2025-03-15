@@ -68,8 +68,9 @@ jobs:
           wget https://dl-game-sdk.discordapp.net/3.2.1/discord_game_sdk.zip
           unzip discord_game_sdk.zip -d dll
           poetry run pyinstaller -F --noconsole --onefile --icon='img/RailOSLauncher.ico' --clean railos_launcher.py --add-binary "dll/lib/x86_64/discord_game_sdk.dll;."
+          rm -rf discord_game_sdk dll/
           mkdir -p release
-          cp dist/railos_launcher.exe release/
+          cp dist/railos_launcher.exe release/RailOSLauncher.exe
           cp .publish-docs/README.pdf release/README.pdf
         shell: bash
       - name: Archive Release
