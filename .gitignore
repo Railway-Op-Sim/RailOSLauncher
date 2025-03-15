@@ -1,4 +1,7 @@
-build/*
-dist/*
-lib/*
+build/
+dist/
+lib/
 *.spec
+venv/
+.venv/
+*.zip

@@ -7,8 +7,6 @@ session, giving status updates such as which route is being operated and how lon
 As well as the mode (e.g. editting a timetable etc).
 """
 
-import pathlib
-
 __author__ = "Kristian Zarebski <krizar312@gmail.com>"
 __date__ = "2022-02-08"
 __license__ = "GPLv3"
@@ -19,6 +17,7 @@ import configparser
 import datetime
 import logging
 import os.path
+import pathlib
 
 logging.basicConfig()
 
@@ -64,21 +63,21 @@ class DiscordBroadcaster:
 =============================================================================
 """
 
-    def __init__(self, railos_location: str, debug: bool = False) -> None:
-        if not os.path.exists(railos_location):
+    def __init__(self, railos_location: pathlib.Path, sdk_directory: pathlib.Path, debug: bool = False) -> None:
+        if not railos_location.exists():
             raise FileNotFoundError(
                 f"Cannot location Railway Operation Simulator, path '{railos_location}' "
                 "does not exist"
             )
         self._logger.setLevel(logging.DEBUG if debug else logging.INFO)
         self._logger.info(self._welcome_message.format(version=self._version))
-        self._start = datetime.datetime.now()
-        self._running = True
-        self._mode = {"main": "", "oper": ""}
-        self._railos_loc = railos_location
-        self._session_ini_file = os.path.join(self._railos_loc, "session.ini")
-        self._discord = discordsdk.Discord(
-            int(self._app_id), discordsdk.CreateFlags.default
+        self._start: datetime.datetime = datetime.datetime.now()
+        self._running: bool = True
+        self._mode: dict[str, Level1Mode | Level2OperMode | None] = {"main": None, "oper": None}
+        self._railos_loc: pathlib.Path = railos_location
+        self._session_ini_file: pathlib.Path = self._railos_loc.joinpath("session.ini")
+        self._discord: discordsdk.Discord = discordsdk.Discord(
+            int(self._app_id), discordsdk.CreateFlags.default, sdk_directory
         )
         self._discord.get_user_manager().on_current_user_update = (
             self.on_curr_user_update
@@ -118,11 +117,11 @@ class DiscordBroadcaster:
         _parser = configparser.ConfigParser()
 
         if not _parser.read(self._session_ini_file):
-            raise configparser.ParsingError(filename=self._session_ini_file)
+            raise configparser.ParsingError(f"{self._session_ini_file}")
 
         return _parser
 
-    def _load_metadata(self, parser: configparser.ConfigParser) -> None:
+    def _load_metadata(self, parser: configparser.ConfigParser) -> dict[str, typing.Any]:
         try:
             _metadata_file: str = parser.get("session", "metadata_file")
 
@@ -141,15 +140,15 @@ class DiscordBroadcaster:
             )
             return {}
 
-    def _update_status(self, parser: configparser.ConfigParser):
+    def _update_status(self, parser: configparser.ConfigParser) -> None:
         try:
             _top_mode = Level1Mode(parser.getint("session", "main_mode"))
             _oper_mode = Level2OperMode(parser.getint("session", "operation_mode"))
-        except configparser.NoOptionError as e:
+        except configparser.NoOptionError:
             self._logger.warning("Failed to retrieve session information from INI file")
 
             return
-        except configparser.NoSectionError as e:
+        except configparser.NoSectionError:
             self._logger.warning(
                 "Failed to retrieve current mode information from INI file"
             )
@@ -268,7 +267,7 @@ class DiscordBroadcaster:
             await asyncio.create_subprocess_shell(_railos_exe)
         else:
             raise FileNotFoundError(
-                f"No executable found at location '{self._railos_loc}' was found"
+                f"No executable found at location '{self._railos_loc}'"
             )
 
     async def _main(self):
@@ -286,20 +285,43 @@ class DiscordBroadcaster:
 
 if __name__ in "__main__":
     import argparse
+    import os
+    import sys
+    import sysconfig
 
     _parser = argparse.ArgumentParser()
+
+    _ros_loc = pathlib.Path(os.environ.get("ProgramFiles", "C:\\Program Files")).joinpath("Railway_Operation_Simulator", "Railway")
+
+    if getattr(sys, 'frozen', False):
+        _default_loc = pathlib.Path(sysconfig.get_paths()["purelib"]).parents[1]
+        if not _ros_loc.exists():
+            _ros_loc = pathlib.Path(sys.executable).parent
+    else:
+        _default_loc = pathlib.Path(__file__).parent
+        if not _ros_loc.exists():
+            _ros_loc = _default_loc
+
     _parser.add_argument(
         "--railos-location",
         help="Location of the RailOS executable file",
-        default="..",
+        default=f"{_ros_loc}",
+    )
+    _parser.add_argument(
+        "--sdk-dir",
+        help="Location of Discord SDK",
+        default=f"{_default_loc}"
     )
     _parser.add_argument(
         "--debug", action="store_true", default=False, help="Run in debug mode"
     )
     _args = _parser.parse_args()
-    _railos_loc = _args.railos_location
-    if not os.path.exists(_railos_loc):
+    _railos_loc = pathlib.Path(_args.railos_location)
+    _sdk_dir = pathlib.Path(_args.sdk_dir)
+
+    if not _railos_loc.exists():
         raise AssertionError(
             f"Launcher failed, could not find Railway Operation Simulator 'railway.exe/RailOS64.exe/RailOS32.exe' at '{_railos_loc}'"
         )
-    DiscordBroadcaster(_railos_loc, _args.debug).run()
+
+    DiscordBroadcaster(_railos_loc, _sdk_dir, _args.debug).run()

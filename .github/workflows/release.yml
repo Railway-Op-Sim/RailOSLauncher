@@ -9,7 +9,7 @@ permissions:
 jobs:
   create-release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,13 +42,14 @@ jobs:
       - uses: Gr1N/setup-poetry@v7
       - name: Create Package
         run: |
-          LC_ALL="UTF-8" LC_CTYPE="UTF-8" poetry install
+          LC_ALL="UTF-8" LC_CTYPE="UTF-8" poetry install --no-root
           SITE_PACKAGES=$(poetry run python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
-          poetry run pyinstaller -F --noconsole --paths=$SITE_PACKAGES --icon='img/RailOSLauncher.ico' --clean railos_launcher.py
-          sudo apt install zip -y
+          choco install wget -y
+          wget https://dl-game-sdk.discordapp.net/3.2.1/discord_game_sdk.zip
+          unzip discord_game_sdk.zip -d dll
+          poetry run pyinstaller -F --noconsole --onefile --icon='img/RailOSLauncher.ico' --clean railos_launcher.py --add-binary "dll/lib/x86_64/discord_game_sdk.dll;."
           DIR_NAME=$(echo "${{ steps.outdir_name.outputs.stdout }}" | xargs)_$(echo "${{ steps.outver.outputs.stdout }}" | xargs)
           DIR_NAME=$(echo $DIR_NAME | xargs)
-          mkdir -p $DIR_NAME/lib
           cp deploy/README.pdf $DIR_NAME/
           cp railos_launcher.exe $DIR_NAME/
           ${{ steps.publish-document.outputs.pdf }} $DIR_NAME/README.pdf
