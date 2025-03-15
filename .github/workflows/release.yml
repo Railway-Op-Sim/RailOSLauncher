@@ -7,13 +7,37 @@ permissions:
   contents: write
 
 jobs:
+  create-pdf:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Markdown to PDF and HTML
+        uses: BaileyJM02/markdown-to-pdf@v1.2.0
+        with:
+          images_dir: media
+          input_path: README.md
+          output_dir: pdfs 
+          build_pdf: true
+          build_html: false
+      - name: Archive README
+        uses: actions/upload-artifact@v4
+        with:
+          name: railoslauncher-readme
+          path: pdfs
+          if-no-files-found: error
+          retention-days: 1
+
   create-release:
     name: Create Release
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Retrieve README PDF
+        uses: actions/download-artifact@v4
         with:
-          submodules: recursive
+          name: railosconsist-readme
+          path: .publish-docs/
       - name: Get Previous tag
         id: previoustag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
@@ -29,34 +53,37 @@ jobs:
           run: |
             VERSION="${{ steps.previoustag.outputs.tag }}"
             echo ${VERSION//./_} | xargs
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.13'
           architecture: 'x64'
-      - name: Publish PDF Document
-        uses: shrink/actions-document-publish@v1
-        id: publish-document
-        with:
-          sources: 'README.md'
-      - uses: Gr1N/setup-poetry@v7
+      - name: Setup Poetry
+        run: python -m pip install poetry
       - name: Create Package
         run: |
-          python -m pip install poetry
           LC_ALL="UTF-8" LC_CTYPE="UTF-8" poetry install --no-root
           SITE_PACKAGES=$(poetry run python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
           choco install wget -y
           wget https://dl-game-sdk.discordapp.net/3.2.1/discord_game_sdk.zip
           unzip discord_game_sdk.zip -d dll
           poetry run pyinstaller -F --noconsole --onefile --icon='img/RailOSLauncher.ico' --clean railos_launcher.py --add-binary "dll/lib/x86_64/discord_game_sdk.dll;."
+          mkdir -p release
+          cp railos_launcher.exe release/
+          cp .publish-docs/README.pdf release/README.pdf
+        shell: bash
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: 'zip'
+          filename: 'release.zip'
+          path: 'release'
+      - name: Rename Release
+        run: |
           DIR_NAME=$(echo "${{ steps.outdir_name.outputs.stdout }}" | xargs)_$(echo "${{ steps.outver.outputs.stdout }}" | xargs)
           DIR_NAME=$(echo $DIR_NAME | xargs)
-          cp deploy/README.pdf $DIR_NAME/
-          cp railos_launcher.exe $DIR_NAME/
-          ${{ steps.publish-document.outputs.pdf }} $DIR_NAME/README.pdf
-          zip -r $DIR_NAME.zip $DIR_NAME
-        shell: bash
+          mv release.zip $DIR_NAME.zip
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
