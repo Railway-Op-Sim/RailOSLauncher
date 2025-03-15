@@ -15,7 +15,7 @@ jobs:
       - name: Markdown to PDF and HTML
         uses: BaileyJM02/markdown-to-pdf@v1.2.0
         with:
-          images_dir: media
+          images_dir: img
           input_path: README.md
           output_dir: pdfs 
           build_pdf: true
@@ -69,7 +69,7 @@ jobs:
           unzip discord_game_sdk.zip -d dll
           poetry run pyinstaller -F --noconsole --onefile --icon='img/RailOSLauncher.ico' --clean railos_launcher.py --add-binary "dll/lib/x86_64/discord_game_sdk.dll;."
           mkdir -p release
-          cp railos_launcher.exe release/
+          cp dist/railos_launcher.exe release/
           cp .publish-docs/README.pdf release/README.pdf
         shell: bash
       - name: Archive Release
@@ -83,6 +83,7 @@ jobs:
           DIR_NAME=$(echo "${{ steps.outdir_name.outputs.stdout }}" | xargs)_$(echo "${{ steps.outver.outputs.stdout }}" | xargs)
           DIR_NAME=$(echo $DIR_NAME | xargs)
           mv release.zip $DIR_NAME.zip
+        shell: bash
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
